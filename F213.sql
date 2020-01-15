@@ -13,7 +13,7 @@ ORDER BY Tit.cdCliente asc;
 SELECT SUM(Tit.VlBruto) FROM vfTituloCRE AS Tit
 INNER JOIN BaixaRecTit AS Baixat ON Tit.cdRec = Baixat.cdRec
 INNER JOIN BaixaRec AS BaixaR ON Baixat.cdBordRec = BaixaR.cdBordRec
-WHERE Tit.dtVencto BETWEEN '2019-09-01' AND '2019/09/30'
+WHERE Tit.dtVencto BETWEEN '01/09/2019' AND '30/09/2019'
 AND BaixaR.fDevolucao != 'S'
 AND Baixat.Status != 'C'
 AND Tit.cdFilial = 0;
