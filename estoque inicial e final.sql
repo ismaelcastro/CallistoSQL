@@ -1,51 +1,63 @@
 use Callisto
 
+
+
+
 select mov.codp,
 produto.apelido,
+produto.NOME,
+format(
 SUM(
 case 
 when mov.fES = 1 
 and MovCtb.dsMovCtb 
 NOT IN('Outras Saídas', 'Outras Entradas')
 and year(mov.dtMov) = 2019
-then mov.qtMov else 0 end) AS TotalEntradas,
+then mov.qtMov else 0 end), 'N')
+AS TotalEntradas,
 
+format(
 SUM(
 case 
 when mov.fES = 1 
 and MovCtb.dsMovCtb NOT IN('Outras Saídas', 'Outras Entradas')
 and year(mov.dtMov) = 2019
-then mov.vlMov else 0 end) AS vlTotalEntradas,
+then mov.vlMov else 0 end), 'C', 'PT-BR')
+AS vlTotalEntradas,
 
+format(
 SUM(
 case 
 when mov.fES = -1 
 and MovCtb.dsMovCtb NOT IN('Outras Saídas', 'Outras Entradas') 
 and year( mov.dtMov) = 2019 
-then mov.qtMov else 0 end) AS TotalSaidas,
+then mov.qtMov else 0 end), 'N') 
+AS TotalSaidas,
+
+format(
 SUM(
 case 
 when mov.fES = -1 
 and MovCtb.dsMovCtb NOT IN('Outras Saídas', 'Outras Entradas') 
 and year(mov.dtMov) = 2019
-then mov.vlMov else 0 end) AS vlTotalSaida,
-(SELECT top 1 FIRST_VALUE(qtSaldo) OVER(ORDER BY seqMov desc) FROM mov M where M.CODP = mov.CODP and cdFilial = 0 
+then mov.vlMov else 0 end), 'C', 'PT-BR') AS vlTotalSaida,
+(SELECT top 1 format(FIRST_VALUE(qtSaldo) OVER(ORDER BY seqMov desc),'N') FROM mov M where M.CODP = mov.CODP and cdFilial = 0 
 	
 	and (year(m.dtMov) < 2019)
 )
 AS 'Saldo Inicial',
-(SELECT top 1 FIRST_VALUE(vlFinanceiro) OVER(ORDER BY seqMov desc) FROM mov M where M.CODP = mov.CODP and cdFilial = 0 
+(SELECT top 1 format(FIRST_VALUE(vlFinanceiro) OVER(ORDER BY seqMov desc), 'C', 'PT-BR') FROM mov M where M.CODP = mov.CODP and cdFilial = 0 
 	
 	and (year(m.dtMov) < 2019)
 )
 AS 'Valor Financeiro Inicial',
 
-(SELECT top 1 FIRST_VALUE(qtSaldo) OVER(ORDER BY seqMov desc) FROM mov M where M.CODP = mov.CODP and cdFilial = 0
+(SELECT top 1 format(FIRST_VALUE(qtSaldo) OVER(ORDER BY seqMov desc), 'N') FROM mov M where M.CODP = mov.CODP and cdFilial = 0
 and (year(m.dtMov) < 2020)
 )
 AS 'Saldo Final',
 
-(SELECT top 1 FIRST_VALUE(vlFinanceiro) OVER(ORDER BY seqMov desc) FROM mov M where M.CODP = mov.CODP and cdFilial = 0
+(SELECT top 1 format(FIRST_VALUE(vlFinanceiro) OVER(ORDER BY seqMov desc), 'C', 'pt-br') FROM mov M where M.CODP = mov.CODP and cdFilial = 0
 and (year(m.dtMov) < 2020)
 )
 AS 'Valor Financeiro Final'
@@ -67,4 +79,4 @@ and mov.fNTE = 'N'
 and isnull(mov.fCusto,'M') = 'M'
 and (null is null or movctb.cdMovCtb is null)
 and exists (select 1 from SaldoNEP where SaldoNEP.cdi=Mov.cdi) -- não vai mostrar dados anteriores a 2018, implantação do saldoNEP
-GROUP BY mov.codp, produto.apelido order by mov.codp
+GROUP BY mov.codp, produto.apelido, produto.NOME order by mov.codp
