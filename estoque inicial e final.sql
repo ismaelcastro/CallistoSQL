@@ -1,8 +1,5 @@
 use Callisto
 
-
-
-
 select mov.codp,
 produto.apelido,
 produto.NOME,
